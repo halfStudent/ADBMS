@@ -1,0 +1,69 @@
+Create table emp1(dept_id number(4), emp_spec XMLType);
+
+insert into emp1 values(1001,XMLType
+('<employees><emp id="001">
+<name>Alpha</name>
+<email>alpha@newton.com</email>
+<acc_no>101</acc_no>
+<dateofjoining>1995-11-23</dateofjoining>
+</emp></employees>')
+);
+
+insert into emp1 values(1001,XMLType
+('<employees><emp id="002">
+<name>Beta</name>
+<email>Beta@newton.com</email>
+<acc_no>102</acc_no>
+<dateofjoining>1994-09-15</dateofjoining>
+</emp></employees>')
+);
+
+insert into emp1 values(1001,XMLType
+('<employees><emp id="003">
+<name>Gamma</name>
+<email>Gamma@newton.com</email>
+<acc_no>103</acc_no>
+<dateofjoining>1994-08-30</dateofjoining>
+</emp></employees>')
+);
+
+
+a.	Retrieve the names of employee from employee table  
+
+select e.emp_spec.extract('/employees/emp/name/text()').getStringVal() "names" from emp1 e;
+
+b.	Retrieve the acc_no  of employee from employee table
+
+select e.emp_spec.extract('/employees/emp/acc_no/text()').getStringVal() "acc_no" from emp1 e;
+
+c.	Retrieve the names, acc_no, email of employees from employee table 
+
+select e.emp_spec.extract('/employees/emp/name/text()').getStringVal()
+"names",e.emp_spec.extract('/employees/emp/acc_no/text()').getStringVal()
+"acc_no",e.emp_spec.extract('/employees/emp/email/text()').getStringVal()
+"email" from emp1 e;
+
+
+
+How to update XML
+
+update emp1 e set emp_spec=XMLType(
+'<employees>
+<emp id="002">
+<name>Omega</name>
+</emp>
+</employees>')
+where
+e.emp_spec.extract('/employees/emp/@id').getStringVal()='002';
+
+
+Delete an XML Type Column Row
+
+delete from emp1 e where e.emp_spec.extract('/employees/emp/@id').getStringVal()='003';
+
+select e.emp_spec.extract('/employees/emp/acc_no/text()').getStringVal() "acc_no" from emp1 e;
+
+or
+
+select * from emp1;
+

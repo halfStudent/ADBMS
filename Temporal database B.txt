@@ -1,0 +1,19 @@
+create table time_emp(
+accno varchar(5),
+ename varchar(10),
+jdate date,
+rdate date);
+
+select * from time_emp where jdate='1-jun-2009';
+
+select * from time_emp where rdate='3-nov-2043';
+
+select * from time_emp where rdate=to_date('3-nov-2043','dd-mm-yyyy');
+
+select accno,ename,jdate from time_emp where jdate between '1-jan-2016' and '31-dec-2016';
+
+select * from time_emp where rdate between '1-oct-2055' and '31-dec-2055';
+
+select * from time_emp where rdate between sysdate and sysdate+365;
+
+select * from time_emp where ename in('gamma','nik') and jdate between '1-jun-2009' and '8-dec-2012';

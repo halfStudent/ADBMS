@@ -1,0 +1,170 @@
+create or replace type AddrType as object(
+Pincode number(5),
+Street char(20),
+City varchar2(50),
+state varchar2(40),
+no number(4));
+/
+
+create or replace type BranchType as object(
+address AddrType,
+phone1 integer,
+phone2 integer);
+/
+
+create or replace type BranchTableType as table of BranchType;
+/
+
+create or replace type AuthorType as object( name varchar2(50), addr AddrType); 
+/
+
+create table Authors of AuthorType;
+
+create or replace type AuthorListType as varray(10) of ref AuthorType;
+/
+
+create or replace type PublisherType as
+object(name varchar2(50), addr AddrType, branches BranchTableType);
+/
+
+create table Publishers of PublisherType
+NESTED TABLE branches STORE as BranchTable;
+
+create table books( title varchar2(50),
+year date, published_by ref PublisherType,
+Authors AuthorListType);
+
+insert into Authors values
+('Rabiner', AddrType(5002,'sstreet','pune','mha',04));
+
+insert into authors values
+('Jerry', AddrType(7003, 'dstreet','mumbai','mha',1003));
+
+insert into authors values
+('Paulraj', AddrType(7008, 'sstreet','mumbai','mha',1007));
+
+insert into authors values
+('Elmasri', AddrType(7006, 'nstreet','mumbai','mha',1006));
+
+insert into authors values
+('Ramakrishnan', AddrType(8002, 'dstreet','pune','mha',1003));
+
+insert into Authors values
+('Schiller', AddrType(7002,'lbsmarg','mumbai','mha',01));
+
+insert into Publishers values(
+'Pearson', AddrType(4002,'rstreet','mumbai','mha',03),
+BranchTableType (BranchType
+(AddrType(5002, 'fstreet','mumbai','mha', 03),23406,69896)));
+
+insert into Publishers values(
+'ekta', AddrType(7007, 'sstreet','mumbai','mha',1007),
+BranchTableType (BranchType(
+AddrType(7007, 'sstreet','mumbai','mha',1007),4543545,8676775)));
+
+insert into Publishers values(
+'joshi', AddrType(7008, 'sstreet','mumbai','mha',1007),
+BranchTableType (BranchType(
+AddrType(1002, 'sstreet','nasik','mha',1007), 456767,7675757)));
+
+insert into Publishers values(
+'wiley', AddrType(6002, 'sstreet','nasik','mha',1007),
+BranchTableType(BranchType(
+AddrType(6002, 'sstreet','nasik','mha',1007),4543545,8676775)));
+
+insert into books
+select 'DSP','28-may-1983',ref(pub),
+AuthorListType(ref(aut))
+from Publishers pub,Authors aut
+where pub.name='joshi' and
+aut.name='Elmasri';
+
+insert into books
+select 'compiler','09-jan-1890',ref(pub),
+AuthorListType(ref(aut))
+from Publishers pub,Authors aut
+where pub.name='wiley'and
+aut.name='Jerry';
+
+insert into books
+select 'Speech Recognition','25-may-1983',ref(pub),
+AuthorListType(ref(aut))
+from Publishers pub,Authors aut
+where pub.name='Pearson'and
+aut.name='Rabiner';
+
+insert into books
+select 'DBMS','28-may-1983',ref(pub),
+AuthorListType(ref(aut))
+from Publishers pub, Authors aut
+where pub.name='joshi' and aut.name='Elmasri';
+
+insert into books
+select 'DBMS','28-may-1983',ref(pub),
+AuthorListType(ref(aut))
+from Publishers pub, Authors aut
+where pub.name='Pearson' and aut.name='Elmasri';
+
+insert into books
+select 'DSP', '28-may-1983',ref(pub),
+AuthorListType(ref(aut))
+from publishers pub, Authors aut
+where pub.name='joshi' and aut.name='Jerry';
+
+
+
+1.	List all of the authors that have the same address as their publisher:
+
+select aut.name from Authors aut ,Publishers pub
+where aut.addr=pub.addr;
+
+2.	List all of the authors that have the same pin code as their publisher:
+
+select aut.name from Authors aut ,Publishers pub
+where aut.addr.pincode=pub.addr.pincode;
+
+3.	List all books that have 2 or more authors:
+
+select * from books b where 1 = ( select count(*)
+from table (b.authors));
+
+4.	List the title of the book that has the most authors:
+
+select title
+from books b, table(b.authors)
+group by title
+having count(*) = (select max(count(*)) from books b, table(b.authors) group by title);
+
+5.	List the name of the publisher that has the most branches:
+
+Select p.name
+from publishers p, table(p.branches)
+group by p.name having count(*)> = all (select count(*)
+from publishers p, table(p.branches)
+group by name);
+
+6.	Name of authors who have not published a book:
+
+select a.name from authors a
+where not exists( select b.title from books b, table(b.authors)
+where a.name = name);
+
+7.	Move all the branches that belong to the publisher 'wiley' to the publisher ‘ekta'.
+
+insert into table(
+select branches from publishers where name = 'wiley')
+select b.* from publishers p, table(p.branches) b
+where name = 'ekta';
+
+8.	List all authors who have published more than one book:
+
+select a.name from authors a, books b,table(b.authors) v
+where
+v.column_value=ref(a) group by a.name;
+
+9.	List all books (title) where the same author appears more than once on the list of authors (assuming that an integrity constraint requiring that the name of an author is unique in a list of authors has not been specified).
+
+select title
+from authors a, books b, table(b.authors) v
+where v.column_value = ref(a)
+group by title having count(*) > 1;

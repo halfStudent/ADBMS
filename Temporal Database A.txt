@@ -1,0 +1,64 @@
+CREATE TABLE SHARES(
+COMPANY_NAME VARCHAR(10),
+NO_SHARES NUMBER(5),
+PRICE NUMBER(5),
+TRANSACTION_TIME TIMESTAMP);
+
+insert into shares values('&company_name',&no_shares,&price,'&transaction_time');
+
+COMPANY_NA  NO_SHARES      PRICE
+---------- ---------- ----------
+TRANSACTION_TIME
+---------------------------------------------------------------------------
+infosys           300         10
+10-FEB-10 09.20.45.000000 AM
+
+wipro             200         20
+08-JUL-11 02.30.12.000000 PM
+
+himalaya          100         15
+18-NOV-09 12.40.42.000000 AM
+
+
+COMPANY_NA  NO_SHARES      PRICE
+---------- ---------- ----------
+TRANSACTION_TIME
+---------------------------------------------------------------------------
+mbt               100         20
+28-APR-11 01.00.42.000000 PM
+
+patni             500         10
+28-APR-11 10.07.24.000000 PM
+
+IGate              40          5
+10-JUN-10 04.25.48.000000 AM
+
+
+COMPANY_NA  NO_SHARES      PRICE
+---------- ---------- ----------
+TRANSACTION_TIME
+---------------------------------------------------------------------------
+Capgemini         250          5
+23-FEB-13 10.00.55.000000 PM
+
+Infosys           300         50
+22-JUN-11 10.07.50.000000 AM
+
+Patni             100         20
+21-JUN-14 10.07.45.000000 PM
+
+
+COMPANY_NA  NO_SHARES      PRICE
+---------- ---------- ----------
+TRANSACTION_TIME
+---------------------------------------------------------------------------
+Infosys           150         40
+14-DEC-15 09.15.45.000000 AM
+
+
+select company_name from shares
+where price >=10
+and to_char(transaction_time,'hh12:mi') = '10:07';
+
+select company_name,no_shares from shares
+where to_char(transaction_time,'dd-mm-yyyyHh12:mi:am')>= '22-sept-2011 10:07:am';

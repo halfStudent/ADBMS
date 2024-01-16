@@ -1,0 +1,109 @@
+create table employee_01(
+Eno number primary key,
+Ename varchar2(10),
+hours number,
+p_no number,
+super_no number);
+
+       ENO ENAME           HOURS       P_NO   SUPER_NO
+---------- ---------- ---------- ---------- ----------
+         1 seema              12         11          2
+         2 smita              15         11         10
+         3 sarika             14         11          2
+         4 sujata             12         12         34
+         5 raji               10         12         34
+         6 rekha              15         12         34
+         7 minal              10         13         67
+         8 sheetal             5         13         67
+         9 hetal              15         13         67
+        10 neha               14         14         78
+
+create table project_01(
+p_no number primary key,
+pname varchar2(10),
+tothrs number,
+super_no number);
+
+      P_NO PNAME          TOTHRS   SUPER_NO
+---------- ---------- ---------- ----------
+        11 ABC                 0          2
+        12 PQR                 0         34
+        13 XYZ                 0         67
+        14 LMN                 0         78
+
+UPDATE TOTHRS IN TABLE PROJECT
+update project_01 set tothrs=tothrs+(select sum(hours)
+from employee_01 where p_no=11) where p_no=11;
+
+*update for all p_no*
+
+TRIGGERS
+
+1. Creating a trigger to insert new employees tuple and display the new total hours from project table.
+
+create or replace trigger emp_pr_01
+after insert on employee_01
+for each row
+when(new.p_no IS NOT NULL)
+begin
+update project_01
+set tothrs=tothrs+:new.hours
+where p_no=:new.p_no;
+end;
+/
+
+insert into employee_01 values(11,'senhal',20,14,78);
+select * from employee_01;
+select * from project_01;
+
+2. Creating a trigger to change the hours of existing employee and display the new total hours from project table.
+
+create or replace trigger emp_pr_02
+after update of hours on employee_01
+for each row
+when(old.p_no IS NOT NULL)
+begin
+update Project_01
+set tothrs=tothrs-:old.hours+:new.hours
+where p_no=:old.p_no;
+end;
+/
+
+update employee_01 set hours=50 where ename ='senhal';
+select * from employee_01;
+select * from project_01;
+
+3. Create a trigger to change the project of existing employee & display the new total hours from project.
+
+create or replace trigger emp_pr_03
+after update of p_no on employee_01
+for each row
+begin
+update project_01
+set tothrs=tothrs-:old.hours
+where p_no=:old.p_no;
+update project_01
+set tothrs=tothrs+:new.hours
+where p_no=:new.p_no;
+end;
+/
+
+update employee_01 set p_no=14, super_no=78 where ename='smita';
+select * from employee_01;
+select * from project_01;
+
+4. Create a trigger to delete the project of an employee.
+
+create or replace trigger emp_pr_04
+after delete on employee_01
+for each row
+when(old.p_no IS NOT NULL)
+begin
+update project_01
+set tothrs=tothrs-:old.hours
+where p_no=:old.p_no;
+end;
+/
+update employee_01 set p_no=null where ename='sheetal';
+select * from employee_01;
+select * from project_01;
